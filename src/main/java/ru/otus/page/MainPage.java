@@ -70,7 +70,7 @@ public class MainPage {
       } catch (StaleElementReferenceException ex) {
         System.out.println("🔁 StaleElementReference, повторяем (попытка " + attempt + ")...");
       } catch (Exception e) {
-        // Можно логировать другие исключения
+        // исключения
         System.out.println("🔁 Иная ошибка: " + e.getMessage());
       }
     }
@@ -98,7 +98,7 @@ public class MainPage {
     String categoryName = randomLink.getText();
     System.out.println("🎯 Выбрана категория: " + categoryName);
 
-    // Սկրոլում ենք դեպի տարրն ու սպասում՝ դառնա clickable
+    // Прокручиваем к элементу и ждём, пока он станет кликабельным
     ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", randomLink);
     wait.until(ExpectedConditions.elementToBeClickable(randomLink));
 

@@ -63,10 +63,10 @@ public class CatalogPage {
         continue;
       }
 
-      // Քաղում ենք վերնագիրը՝ մինչև ամսաթիվը
+      // Извлекаем название курса до даты начала
       String title = fullText.replaceAll("\\d{1,2}\\s+[а-яА-ЯёЁ]+(?:,\\s*\\d{4})?.*", "").trim();
 
-      // Փորձում ենք քաղել ամսաթիվը
+      // Пытаемся извлечь дату начала курса
       LocalDate parsed = DateUtils.parseDateFromOtusText(fullText);
 
       if (parsed != null) {
@@ -74,13 +74,12 @@ public class CatalogPage {
             DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("ru")));
         courses.add(new CourseData(title, href, startDateString));
       } else {
-        System.out.println("⚠️ Չհաջողվեց քաղել ամսաթիվը՝ " + fullText);
+        System.out.println("⚠️ Не удалось извлечь дату из текста: " + fullText);
       }
     }
 
     return courses;
   }
-
 
   public void clickShowMoreUntilEnd() {
     int lastCount = 0;
@@ -88,45 +87,44 @@ public class CatalogPage {
 
     while (stableTries < 3) {
       try {
-        // ✅ Scroll to bottom
+        // Прокручиваем страницу до самого низа
         ((JavascriptExecutor) driver).executeScript(
             "window.scrollTo(0, document.body.scrollHeight);");
-        Thread.sleep(500); // Տալ DOM-ին բեռնվելու ժամանակ
+        Thread.sleep(500); // Даем время на подгрузку DOM
 
-        // ✅ Փորձում ենք գտնել "Показать ещё" կոճակը
+        // Ищем кнопку "Показать ещё"
         List<WebElement> buttons = driver.findElements(
             By.xpath("//button[contains(text(), 'Показать еще')]"));
         if (!buttons.isEmpty()) {
           WebElement button = buttons.get(0);
           if (button.isDisplayed() && button.isEnabled()) {
-            System.out.println("🖱️ Կատարում ենք JavaScript click 'Показать ещё' կոճակի վրա");
+            System.out.println("🖱️ Кликаем на кнопку 'Показать ещё' через JavaScript");
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", button);
-            Thread.sleep(700); // տալիս ենք ավելի կայուն ժամանակ բեռնման համար
+            Thread.sleep(700); // Небольшая пауза для стабильной подгрузки
           }
         }
 
-        // ✅ Վերցնում ենք կուրսերի քանակը
+        // Проверяем текущее количество курсов
         List<WebElement> courses = driver.findElements(By.cssSelector("a[href^='/lessons/']"));
         int currentCount = courses.size();
 
         if (currentCount > lastCount) {
-          System.out.println("📈 Նոր կուրսեր բեռնվեցին: " + currentCount);
+          System.out.println("📈 Загрузились новые курсы: " + currentCount);
           lastCount = currentCount;
           stableTries = 0;
         } else {
           stableTries++;
-          System.out.println("⏸️ Քանակը չի փոխվել (փորձ " + stableTries + ")");
+          System.out.println("⏸️ Количество курсов не изменилось (попытка " + stableTries + ")");
         }
 
       } catch (Exception e) {
-        System.out.println("⚠️ Սխալ scroll-ի կամ կոճակի ժամանակ: " + e.getMessage());
+        System.out.println("⚠️ Ошибка при прокрутке или клике: " + e.getMessage());
         break;
       }
     }
 
-    System.out.println("📦 Վերջնական բեռնված կուրսերի քանակը: " + lastCount);
+    System.out.println("📦 Финальное количество загруженных курсов: " + lastCount);
   }
-
 
   public void waitForCourseToAppear(String courseName) {
     new WebDriverWait(driver, Duration.ofSeconds(10)).until(
@@ -134,7 +132,7 @@ public class CatalogPage {
   }
 
   public void debugPrintAllCourseTitles() {
-    System.out.println("🔍 Կուրսերի վերնագրեր (debug):");
+    System.out.println("🔍 Названия курсов (debug):");
     getAllCoursesFromJsoup().forEach(course -> System.out.println("📘 " + course.title()));
   }
 
@@ -144,6 +142,5 @@ public class CatalogPage {
   }
 
   public record CourseData(String title, String href, String startDate) {
-
   }
 }

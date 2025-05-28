@@ -16,7 +16,7 @@ public class DateUtils {
   }
 
   public static LocalDate parseDateFromOtusText(String text) {
-    // Ունիկ օր+ամիս+տարի pattern
+    // Уникальный шаблон для дня, месяца и года
     Pattern pattern = Pattern.compile("(\\d{1,2})\\s([а-яА-ЯёЁ]+)(?:,\\s?(\\d{4}))?");
     Matcher matcher = pattern.matcher(text);
 
@@ -37,7 +37,8 @@ public class DateUtils {
       }
     }
 
-    // Եթե ոչ մի օր/ամիս չգտնվեց
+    // Если не удалось найти ни день, ни месяц
+
     return null;
   }
 

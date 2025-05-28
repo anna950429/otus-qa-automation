@@ -3,6 +3,7 @@ package ru.otus.di;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
@@ -24,9 +25,7 @@ public class DriverModule extends AbstractModule {
   public WebDriver provideWebDriver() {
 
     // 1) Автоматическая подстановка нужной версии chromedriver
-    // WebDriverManager.chromedriver().setup();
-    System.setProperty("webdriver.chrome.driver",
-        "/Users/an.petrosyan/Downloads/chromedriver-mac-arm64/chromedriver");
+    WebDriverManager.chromedriver().setup();
 
     ChromeOptions options = new ChromeOptions();
 
@@ -47,7 +46,7 @@ public class DriverModule extends AbstractModule {
         System.getProperty("java.io.tmpdir") + "/chrome-profile-" + UUID.randomUUID();
     options.addArguments("--user-data-dir=" + profileDir);
 
-    // 7) Запуск без GUI (headless), если нужно. (Закомментируйте, если хотите браузер с UI)
+    // 7) Запуск без GUI (headless), если нужно.
     // options.addArguments("--headless=new");
 
     // 8) Отключаем нотификации
@@ -56,14 +55,14 @@ public class DriverModule extends AbstractModule {
     // 9) Игнорируем предупреждения об SSL
     options.addArguments("--ignore-certificate-errors");
 
-    // 10) Можно добавить другие оптимизации
+    // 10) если нужно.
     // (например, "--disable-gpu", "--no-sandbox" — в Docker или CI)
 
     ChromeDriver baseDriver = new ChromeDriver(options);
 
-    // Оборачиваем в EventFiringDecorator, чтобы заработал ваш WebDriverHighlightListener
-    WebDriver driver = new EventFiringDecorator(new WebDriverHighlightListener()).decorate(
-        baseDriver);
+    // Оборачиваем в EventFiringDecorator, чтобы заработал наш WebDriverHighlightListener
+    WebDriver driver = new EventFiringDecorator(new WebDriverHighlightListener())
+        .decorate(baseDriver);
 
     // Максимализируем окно
     driver.manage().window().maximize();
