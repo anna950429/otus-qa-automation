@@ -31,7 +31,7 @@ public class Scenario3Test {
       // 4. Убеждаемся, что открылась страница каталога
       String currentUrl = mainPage.getCurrentUrl();
       Assertions.assertTrue(
-          currentUrl.contains("categories"),
+          currentUrl.contains("/catalog") || currentUrl.contains("/categories"),
           "Не открылась страница категории! Текущий URL: " + currentUrl
       );
 

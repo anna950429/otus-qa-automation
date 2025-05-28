@@ -17,7 +17,7 @@ public class DriverModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // пустой configure, если нет биндингов
+
   }
 
   @Provides

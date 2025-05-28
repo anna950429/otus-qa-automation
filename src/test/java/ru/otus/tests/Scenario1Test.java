@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import ru.otus.page.CatalogPage;
+import ru.otus.page.CourseData;
 import ru.otus.page.CoursePage;
 import ru.otus.util.TestExtension;
 
@@ -33,7 +34,7 @@ public class Scenario1Test {
     catalogPage.debugPrintAllCourseTitles();
 
     // Ищем в списке
-    CatalogPage.CourseData course = catalogPage.findCourseByTitle(targetCourseName)
+    CourseData course = catalogPage.findCourseByTitle(targetCourseName)
         .orElseThrow(() -> new AssertionError("Կուրսը չգտնվեց: " + targetCourseName));
 
     // Открываем страницу этого курса
