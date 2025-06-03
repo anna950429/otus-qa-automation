@@ -3,15 +3,15 @@ package ru.otus.di;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import java.time.Duration;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.events.EventFiringDecorator;
-import ru.otus.util.WebDriverHighlightListener;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class DriverModule extends AbstractModule {
 
@@ -22,54 +22,33 @@ public class DriverModule extends AbstractModule {
 
   @Provides
   @Singleton
-  public WebDriver provideWebDriver() {
+  public WebDriver provideWebDriver() throws MalformedURLException {
+    boolean isMobile = Boolean.parseBoolean(System.getProperty("device", "false"));
 
-    // 1) Автоматическая подстановка нужной версии chromedriver
-    WebDriverManager.chromedriver().setup();
+    // ✅ Ստեղծում ենք selenoid:options map
+    Map<String, Object> selenoidOptions = new HashMap<>();
+    selenoidOptions.put("enableVNC", true);
+    selenoidOptions.put("enableVideo", false);
+
+    // ✅ Chrome mobile arguments
+    List<String> chromeArgs = new ArrayList<>();
+    if (isMobile) {
+      chromeArgs.add("--window-size=375,812");
+      chromeArgs.add("--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) "
+          + "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1");
+    }
 
     ChromeOptions options = new ChromeOptions();
+    options.setBrowserVersion("116.0");
+    options.setCapability("selenoid:options", selenoidOptions);
+    if (!chromeArgs.isEmpty()) {
+      options.addArguments(chromeArgs);
+    }
 
-    // 2) Отключаем сообщение "Chrome is being controlled by automated test software"
-    options.setExperimentalOption("excludeSwitches", List.of("enable-automation"));
+    // ✅ Վերադարձնում ենք՝ pointing to Selenoid
+    return new RemoteWebDriver(URI.create("http://localhost:4444/wd/hub").toURL(), options);
 
-    // 3) Отключаем Automation Extension
-    options.setExperimentalOption("useAutomationExtension", false);
-
-    // 4) Маскируем автоматизацию
-    options.addArguments("--disable-blink-features=AutomationControlled");
-
-    // 5) Разрешаем любой origin (особенно актуально для новых версий Chrome)
-    options.addArguments("--remote-allow-origins=*");
-
-    // 6) Создаём временную папку-профиль, чтобы не мешать основному профилю
-    String profileDir =
-        System.getProperty("java.io.tmpdir") + "/chrome-profile-" + UUID.randomUUID();
-    options.addArguments("--user-data-dir=" + profileDir);
-
-    // 7) Запуск без GUI (headless), если нужно.
-    // options.addArguments("--headless=new");
-
-    // 8) Отключаем нотификации
-    options.addArguments("--disable-notifications");
-
-    // 9) Игнорируем предупреждения об SSL
-    options.addArguments("--ignore-certificate-errors");
-
-    // 10) если нужно.
-    // (например, "--disable-gpu", "--no-sandbox" — в Docker или CI)
-
-    ChromeDriver baseDriver = new ChromeDriver(options);
-
-    // Оборачиваем в EventFiringDecorator, чтобы заработал наш WebDriverHighlightListener
-    WebDriver driver = new EventFiringDecorator(new WebDriverHighlightListener())
-        .decorate(baseDriver);
-
-    // Максимализируем окно
-    driver.manage().window().maximize();
-
-    // Ставим неявное ожидание
-    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-
-    return driver;
   }
+
+
 }

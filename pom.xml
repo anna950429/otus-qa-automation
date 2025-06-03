@@ -62,6 +62,24 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- Citrus -->
+    <dependency>
+      <groupId>com.consol.citrus</groupId>
+      <artifactId>citrus-core</artifactId>
+      <version>3.3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.consol.citrus</groupId>
+      <artifactId>citrus-http</artifactId>
+      <version>3.3.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.consol.citrus</groupId>
+      <artifactId>citrus-java-dsl</artifactId>
+      <version>3.3.1</version>
+    </dependency>
     <!-- Cucumber Java -->
     <dependency>
       <groupId>io.cucumber</groupId>

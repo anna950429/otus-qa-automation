@@ -1,0 +1,16 @@
+{
+  "chrome": {
+    "default": "116.0",
+    "versions": {
+      "116.0": {
+        "image": "selenoid/vnc:chrome_116.0",
+        "port": "4444",
+        "path": "/wd/hub",
+        "tmpfs": {
+          "/tmp": "size=512m"
+        },
+        "env": ["TZ=UTC"]
+      }
+    }
+  }
+}

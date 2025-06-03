@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:citrus="http://www.citrusframework.org/schema/config"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+         http://www.springframework.org/schema/beans
+         https://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.citrusframework.org/schema/config
+         https://www.citrusframework.org/schema/config/citrus-config.xsd">
+
+  <citrus:server id="courseApiServer"
+    port="8089"
+    autoStart="true"
+    name="courseApiServer"
+    timeout="5000"
+    endpoint-adapter="citrusEndpointAdapter"/>
+
+  <bean id="citrusEndpointAdapter"
+    class="com.consol.citrus.endpoint.adapter.StaticResponseEndpointAdapter"/>
+</beans>
