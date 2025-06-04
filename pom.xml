@@ -114,8 +114,15 @@
         <version>3.0.0-M7</version>
         <configuration>
           <useModulePath>false</useModulePath>
+          <parallel>classes</parallel> <!-- or "methods" or "both" -->
+          <threadCount>4</threadCount> <!-- Match this with your Selenoid -limit -->
+          <perCoreThreadCount>false</perCoreThreadCount>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
         </configuration>
       </plugin>
+
       <!-- Checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

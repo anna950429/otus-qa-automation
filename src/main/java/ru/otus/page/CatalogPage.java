@@ -1,8 +1,6 @@
 package ru.otus.page;
 
 import com.google.inject.Inject;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,11 +12,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchSessionException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.otus.util.DateUtils;
-import ru.otus.util.WaitUtils;
 
 /**
  * Page Object для страницы каталога курсов OTUS (https://otus.ru/catalog/courses).
@@ -45,22 +45,25 @@ public class CatalogPage {
   }
 
   /**
-   * Открывает страницу каталога с переданной строкой запроса (поиск).
-   * Пример: "?search=QA"
+   * Открывает страницу каталога с переданной строкой запроса (поиск). Пример: "?search=QA"
    */
-  public void openWithSearch(String query) {
-    String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
-    driver.get("https://otus.ru/catalog/courses?search=" + encoded);
+  public void openWithSearch(String searchQuery) {
+    String url = "https://otus.ru/catalog/courses?search=" + searchQuery.replace(" ", "+");
+    System.out.println("🔗 Navigating to: " + url);
+    driver.get(url);
 
-    // Ждём, пока страница действительно отобразит хотя бы что-то, содержащее "QA"
-    WaitUtils.getWait(driver, 20).until(
-        d -> d.getPageSource().contains(query)
-    );
+    try {
+      new WebDriverWait(driver, Duration.ofSeconds(30)).until(
+          ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[class*='course-card']")));
+      System.out.println("✅ Courses loaded");
+    } catch (TimeoutException e) {
+      throw new RuntimeException("❌ Catalog courses not loaded within timeout.");
+    }
   }
 
   /**
-   * Нажимает на кнопку "Показать еще" до тех пор, пока количество курсов продолжает расти.
-   * Либо пока не будет подряд несколько "холостых" кликов.
+   * Нажимает на кнопку "Показать еще" до тех пор, пока количество курсов продолжает расти. Либо
+   * пока не будет подряд несколько "холостых" кликов.
    */
   public void clickShowMoreUntilEnd() {
     int lastCount = 0;
@@ -102,39 +105,51 @@ public class CatalogPage {
   }
 
   /**
-   * Собирает информацию о курсах, отображающихся на странице, с помощью jsoup.
-   * Здесь обязательно должны быть корректные селекторы под реальную верстку.
+   * Собирает информацию о курсах, отображающихся на странице, с помощью jsoup. Здесь обязательно
+   * должны быть корректные селекторы под реальную верстку.
    *
    * @return список курсов (title, href, startDate, price)
    */
   public List<CourseData> getAllCoursesFromJsoup() {
-    String html = driver.getPageSource();
-    Document doc = Jsoup.parse(html);
-
-    // Пример: ищем элементы с классом "course-card"
-    // ПОДСТАВЬТЕ РЕАЛЬНЫЙ CSS-СЕЛЕКТОР ИЗ ВАШЕЙ ВЕРСТКИ
-    Elements courseElements = doc.select("a.sc-zzdkm7-0");
     List<CourseData> result = new ArrayList<>();
 
-    for (Element el : courseElements) {
-      String href = el.attr("href").trim(); // /lessons/...
+    try {
+      // ✅ Wait for course elements to appear to avoid premature pageSource fetch
+      new WebDriverWait(driver, Duration.ofSeconds(30)).until(
+          ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("a.sc-zzdkm7-0")));
 
-      String title = el.select("h6").text();
+      String html = driver.getPageSource();
+      Document doc = Jsoup.parse(html);
 
-      String dateText = el.select("div.sc-hrqzy3-1.jEGzDf").text();
-      LocalDate startDate = DateUtils.parseDateFromOtusText(dateText);
+      Elements courseElements = doc.select("a.sc-zzdkm7-0");
+      for (Element el : courseElements) {
+        String href = el.attr("href").trim(); // /lessons/...
 
-      String priceText = el.select("div.sc-hrqzy3-1.jEGzDf").text();
-      int price = parsePrice(priceText);
+        String title = el.select("h6").text();
 
-      result.add(new CourseData(title, href, startDate,price));
+        String dateText = el.select("div.sc-hrqzy3-1.jEGzDf").text();
+        LocalDate startDate = DateUtils.parseDateFromOtusText(dateText);
+
+        String priceText = el.select("div.sc-hrqzy3-1.jEGzDf").text();
+        int price = parsePrice(priceText);
+
+        result.add(new CourseData(title, href, startDate, price));
+      }
+
+    } catch (TimeoutException e) {
+      System.out.println("❌ Timeout waiting for course cards on page.");
+    } catch (NoSuchSessionException e) {
+      System.out.println("❌ WebDriver session not found. Likely expired.");
+    } catch (Exception e) {
+      System.out.println("❌ Unexpected error while parsing courses: " + e.getMessage());
     }
+
     return result;
   }
 
+
   /**
-   * Удаляем все не-цифры из строки цены и конвертируем в int.
-   * Если не удалось — вернётся 0.
+   * Удаляем все не-цифры из строки цены и конвертируем в int. Если не удалось — вернётся 0.
    */
   private int parsePrice(String priceText) {
     // Удаляем всё, что не цифра
@@ -166,8 +181,7 @@ public class CatalogPage {
    */
   public Optional<CourseData> findCourseByTitle(String targetTitle) {
     return getAllCoursesFromJsoup().stream()
-        .filter(c -> c.title().toLowerCase().contains(targetTitle.toLowerCase()))
-        .findFirst();
+        .filter(c -> c.title().toLowerCase().contains(targetTitle.toLowerCase())).findFirst();
   }
 
 }

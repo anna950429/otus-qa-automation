@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  selenoid:
+    image: aerokube/selenoid
+    container_name: selenoid
+    restart: unless-stopped
+    platform: linux/amd64
+    shm_size: '2gb'
+    ports:
+      - "4444:4444"
+    volumes:
+      - ./browsers.json:/etc/selenoid/browsers.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "-conf"
+      - "/etc/selenoid/browsers.json"
+      - "-container-network=selenoid_net"
+      - "-limit"
+      - "5"
+    networks:
+      - selenoid_net
+
+  selenoid-ui:
+    image: aerokube/selenoid-ui
+    container_name: selenoid-ui
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - selenoid
+    command:
+      - "--selenoid-uri"
+      - "http://selenoid:4444"
+    networks:
+      - selenoid_net
+
+networks:
+  selenoid_net:
+    external: true

@@ -7,11 +7,13 @@ import java.util.Random;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import ru.otus.util.WebDriverUtils;
 
 public class MainPage {
 
@@ -39,13 +41,23 @@ public class MainPage {
    * Если сайт показывает баннер с cookie, закроем его. (Подберите реальный локатор у себя, если он
    * есть.)
    */
-  private void acceptCookiesIfVisible() {
-    By cookieAcceptBtn = By.cssSelector("button[data-testid='button-cookie']");
-    List<WebElement> cookieButtons = driver.findElements(cookieAcceptBtn);
-    if (!cookieButtons.isEmpty()) {
-      cookieButtons.get(0).click();
+  public void acceptCookiesIfVisible() {
+    try {
+      List<WebElement> cookies = new WebDriverWait(driver, Duration.ofSeconds(10)).until(
+          ExpectedConditions.presenceOfAllElementsLocatedBy(
+              By.cssSelector("button[data-testid='button-cookie']")));
+
+      if (!cookies.isEmpty()) {
+        WebDriverUtils.safeClick(cookies.get(0));
+        System.out.println("✅ Cookie button clicked");
+      }
+    } catch (TimeoutException e) {
+      System.out.println("⏳ Cookie button not found within timeout.");
+    } catch (Exception e) {
+      System.out.println("⚠️ Unexpected error in cookie click: " + e.getMessage());
     }
   }
+
 
   /**
    * Наводим курсор на «Обучение» (с ретраем для стабильности).
@@ -85,8 +97,7 @@ public class MainPage {
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
     List<WebElement> links = wait.until(
-        ExpectedConditions.visibilityOfAllElementsLocatedBy(DROPDOWN_CATEGORIES)
-    );
+        ExpectedConditions.visibilityOfAllElementsLocatedBy(DROPDOWN_CATEGORIES));
 
     if (links.isEmpty()) {
       throw new RuntimeException("❌ No category links found.");
@@ -99,7 +110,8 @@ public class MainPage {
     System.out.println("🎯 Выбрана категория: " + categoryName);
 
     // Прокручиваем к элементу и ждём, пока он станет кликабельным
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", randomLink);
+    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});",
+        randomLink);
     wait.until(ExpectedConditions.elementToBeClickable(randomLink));
 
     ((JavascriptExecutor) driver).executeScript("arguments[0].click();", randomLink);
