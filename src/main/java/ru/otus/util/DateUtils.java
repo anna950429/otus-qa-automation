@@ -32,7 +32,7 @@ public class DateUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("ru"));
         return LocalDate.parse(fullDate, formatter);
       } catch (DateTimeParseException e) {
-        System.out.println("⚠️ Չհաջողվեց վերծանել ամսաթիվ՝ " + fullDate);
+        System.out.println("⚠️Не удалось декодировать дату: " + fullDate);
         return null;
       }
     }
