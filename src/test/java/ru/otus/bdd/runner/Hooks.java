@@ -1,41 +1,33 @@
 package ru.otus.bdd.runner;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.guice.ScenarioScoped;
+
 import org.openqa.selenium.WebDriver;
-import ru.otus.di.DriverModule;
 
 /**
- * Хуки для Cucumber, чтобы инициализировать Guice + WebDriver
+ * Եթե ունես setUp/tearDown լոգիկա, թող մնա; բայց WebDriver ստանում ենք DI‑ով,
+ * ոչ թե static -ով։
  */
+@ScenarioScoped
 public class Hooks {
 
-  private static Injector injector;
-  private static WebDriver driver;
+  private final WebDriver driver;
+
+  @Inject
+  public Hooks(WebDriver driver) {
+    this.driver = driver;
+  }
 
   @Before
   public void setUp() {
-    // Создаем Injector
-    injector = Guice.createInjector(new DriverModule());
-    // Получаем WebDriver
-    driver = injector.getInstance(WebDriver.class);
+    // custom pre‑scenario steps (optional)
   }
 
   @After
   public void tearDown() {
-    if (driver != null) {
-      driver.quit();
-    }
-  }
-
-  // Геттер
-  public static WebDriver getDriver() {
-    return driver;
-  }
-
-  public static Injector getInjector() {
-    return injector;
+    // driver.quit() ՔԱՂԱՔիր **չԷ պետք կանչել**. DriverFactory.close() կանի դա
   }
 }

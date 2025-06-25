@@ -1,7 +1,9 @@
 package ru.otus.bdd.steps;
 
+import com.google.inject.Inject;
 import io.cucumber.java.en.*;
 import org.junit.Assert;
+import org.openqa.selenium.WebDriver;
 import ru.otus.bdd.runner.Hooks;
 import ru.otus.page.CatalogPage;
 import ru.otus.page.CourseData;
@@ -15,6 +17,8 @@ import java.util.Locale;
  * Шаги для проверки курсов, начинающихся не раньше определённой даты.
  */
 public class StartDateSteps {
+
+  private final WebDriver driver;
 
   /**
    * Page Object для каталога курсов
@@ -40,8 +44,10 @@ public class StartDateSteps {
   /**
    * В конструкторе получаем CatalogPage через Guice-инжектор (Hooks).
    */
-  public StartDateSteps() {
-    catalogPage = Hooks.getInjector().getInstance(CatalogPage.class);
+  @Inject
+  public StartDateSteps(WebDriver driver, CatalogPage catalogPage /* ... */) {
+    this.driver = driver;
+    this.catalogPage = catalogPage;
   }
 
   /**

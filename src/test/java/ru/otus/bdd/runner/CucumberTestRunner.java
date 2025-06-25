@@ -7,10 +7,7 @@ import org.junit.runner.RunWith;
 @RunWith(Cucumber.class)
 @CucumberOptions(
     features = "classpath:ru/otus/bdd/features",
-    glue = {
-        "ru.otus.bdd.steps",
-        "ru.otus.bdd.runner"
-    },
+    glue = "ru.otus.bdd.steps",
     plugin = {"pretty", "summary"},
     monochrome = true
 )

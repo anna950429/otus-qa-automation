@@ -1,5 +1,6 @@
 package ru.otus.bdd.steps;
 
+import com.google.inject.Inject;
 import io.cucumber.java.en.*;
 import org.junit.Assert;
 import org.jsoup.Jsoup;
@@ -14,13 +15,15 @@ import ru.otus.page.CourseData;
 
 public class CourseSearchSteps {
 
-  private final WebDriver driver = Hooks.getDriver();
+  private final WebDriver driver;
   private final CatalogPage catalogPage;
   private String targetCourseName;
 
-  public CourseSearchSteps() {
-    // Инициализация через Injector
-    catalogPage = Hooks.getInjector().getInstance(CatalogPage.class);
+
+  @Inject
+  public CourseSearchSteps(WebDriver driver, CatalogPage catalogPage /* ... */) {
+    this.driver = driver;
+    this.catalogPage = catalogPage;
   }
 
   @Given("я открываю страницу {string}")

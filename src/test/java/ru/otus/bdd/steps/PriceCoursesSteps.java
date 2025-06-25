@@ -1,5 +1,6 @@
 package ru.otus.bdd.steps;
 
+import com.google.inject.Inject;
 import io.cucumber.java.en.*;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
@@ -20,7 +21,7 @@ public class PriceCoursesSteps {
   /**
    * Получаем WebDriver из Hooks (Guice).
    */
-  private final WebDriver driver = Hooks.getDriver();
+  private final WebDriver driver;
 
   /**
    * CatalogPage - ваш PageObject для работы со списком курсов
@@ -46,12 +47,11 @@ public class PriceCoursesSteps {
   /**
    * В конструкторе получаем CatalogPage через Guice.
    */
-  public PriceCoursesSteps() {
-    // Hooks.getInjector() возвращает нам Injector,
-    // из которого мы берём CatalogPage (где написана логика парсинга курсов).
-    catalogPage = Hooks.getInjector().getInstance(CatalogPage.class);
+  @Inject
+  public PriceCoursesSteps(WebDriver driver, CatalogPage catalogPage /* ... */) {
+    this.driver = driver;
+    this.catalogPage = catalogPage;
   }
-
   /**
    * Шаг для перехода в нужный раздел (например, "Курсы" > "Подготовительные курсы").
    * В вашем случае можете либо использовать MainPage + Actions,
