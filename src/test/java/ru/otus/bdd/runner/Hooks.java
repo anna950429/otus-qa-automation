@@ -28,6 +28,6 @@ public class Hooks {
 
   @After
   public void tearDown() {
-    // driver.quit() ՔԱՂԱՔիր **չԷ պետք կանչել**. DriverFactory.close() կանի դա
+
   }
 }

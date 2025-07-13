@@ -1,7 +1,6 @@
 package ru.otus.di;
 
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
@@ -13,7 +12,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 import ru.otus.util.WebDriverHighlightListener;
 
-@Singleton
 public class DriverFactory implements Provider<WebDriver>, Closeable {
 
   private final WebDriver driver;

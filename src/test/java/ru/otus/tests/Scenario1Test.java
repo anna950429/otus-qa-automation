@@ -11,6 +11,7 @@ import ru.otus.page.CourseData;
 import ru.otus.page.CoursePage;
 import ru.otus.util.TestExtension;
 
+
 @ExtendWith(TestExtension.class)
 public class Scenario1Test {
 

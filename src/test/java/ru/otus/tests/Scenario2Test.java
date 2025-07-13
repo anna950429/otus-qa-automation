@@ -10,12 +10,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import ru.otus.page.CatalogPage;
 import ru.otus.page.CourseData;
 import ru.otus.page.CoursePage;
-import ru.otus.util.TestExtension;
+
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import ru.otus.util.TestExtension;
+
 
 @ExtendWith(TestExtension.class)
 public class Scenario2Test {

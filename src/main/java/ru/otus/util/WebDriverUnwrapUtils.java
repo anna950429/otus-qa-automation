@@ -5,8 +5,8 @@ import org.openqa.selenium.WrapsDriver;
 
 public class WebDriverUnwrapUtils {
   public static WebDriver unwrap(WebDriver driver) {
-    if (driver instanceof WrapsDriver) {
-      return ((WrapsDriver) driver).getWrappedDriver();
+    while (driver instanceof WrapsDriver) {
+      driver = ((WrapsDriver) driver).getWrappedDriver();
     }
     return driver;
   }

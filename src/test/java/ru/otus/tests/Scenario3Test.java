@@ -8,6 +8,7 @@ import ru.otus.page.MainPage;
 import ru.otus.page.CatalogPage;
 import ru.otus.util.TestExtension;
 
+
 @ExtendWith(TestExtension.class)
 public class Scenario3Test {
 
